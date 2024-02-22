@@ -5,7 +5,7 @@ const router = require("express").Router();
 
 
 router.post('/register', registerUser);
-router.post('/login',login);
+router.get('/login',login);
 router.post('/updateUser',updateUser);
 
 

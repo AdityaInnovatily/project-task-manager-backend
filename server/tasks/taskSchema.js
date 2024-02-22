@@ -24,6 +24,10 @@ let TaskSchema = new Schema(
             task:{type:String},
             isChecked: {type:Boolean, default: false},
         }]
+    },
+    userId:{
+      type:String,
+      required:true
     }
   },
   {

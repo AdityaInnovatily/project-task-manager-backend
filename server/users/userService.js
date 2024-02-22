@@ -1,6 +1,7 @@
 const userSchema = require("./userSchema");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const { default: mongoose } = require('mongoose');
 
 
 module.exports.registerUser = async (req, res) => {
@@ -52,6 +53,7 @@ module.exports.login = async (req, res) => {
     const { email, password } = req.body;
   
     const user = await userSchema.findOne({ email: email });
+    console.log("user;",user);
 
     if (!user){
       return res.send({ msg: `oops!, ${email} does not exist`});
@@ -72,8 +74,31 @@ module.exports.login = async (req, res) => {
 };
 
 
-module.exports.updateUser = async(req, res) =>{
+module.exports.updateUser = async (req, res) =>{
+  
+  const {userId, name, oldPassword, newPassword } = req.body;
+console.log(req.body, userId);
+  
+  
+  let userDetails = await userSchema.findOne({_id:userId});
 
+  let isPaswordMatched =  await bcrypt.compare(oldPassword, userDetails.password);
+
+  
+  if(!isPaswordMatched){
+   return res.send({msg:`${oldPassword} this is wrong password.`});
+  }
+  
+  const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+ let userResponse = await userSchema.updateOne({_id:userId},{
+    name: name,
+    password:hashedNewPassword
+  });
+
+
+  let updatedUser = await userSchema.findOne({_id: userId})
+  res.status(201).send(updatedUser);
 
 }
 

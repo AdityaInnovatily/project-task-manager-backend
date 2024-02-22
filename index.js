@@ -8,6 +8,7 @@ app.use(cors());          // allow to cors
 app.use(express.json());  // this is parse the json req of apis.
 
 const userController = require("./server/users/userController");
+const taskController = require("./server/tasks/taskController");
 
 
 mongoose.connect(process.env.DATABASE_HOST, {
@@ -25,6 +26,7 @@ mongoose.connect(process.env.DATABASE_HOST, {
 
 
 app.use("/user",userController);
+app.use("/task",taskController);
 
 app.get('/', async(req,res)=>{
 

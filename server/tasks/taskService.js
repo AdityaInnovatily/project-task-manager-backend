@@ -2,11 +2,12 @@
 const taskSchema = require("./taskSchema");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const { default: mongoose } = require('mongoose');
 
 
 module.exports.createTask = async (req, res) => {
   
-    const { title, priority, checklist, dueDate, status } = req.body;
+    const { title, priority, checklist, dueDate, status, userId } = req.body;
   
     const checkTaskTitle = await taskSchema.findOne({ title: title });
 
@@ -20,7 +21,8 @@ module.exports.createTask = async (req, res) => {
             priority:priority,
             dueDate: dueDate,
             status: status,
-            checklist: checklist
+            checklist: checklist,
+            userId: userId
           });
       
           res.status(200).send(taskSubmit);
@@ -39,7 +41,7 @@ module.exports.createTask = async (req, res) => {
 
 
      // console.log("///////////////////////entry//////////////////////",req.body);
-     const { taskId, title, priority, checklist, dueDate, status } = req.body;
+     const { taskId, title, priority, checklist, dueDate, status, userId } = req.body;
   
    
      const checkTaskTitle = await taskSchema.findOne({ title: title });
@@ -61,14 +63,29 @@ module.exports.createTask = async (req, res) => {
             priority:priority,
             dueDate: dueDate,
             status: status,
-            checklist: checklist
+            checklist: checklist,
+            userId: userId
           }
       },
     );
 
-    res.status(200).send(taskSubmit);
+    const updatedTask = await taskSchema.findOne({_id: taskObjectId});
+
+    res.status(200).send(updatedTask);
   } catch (error) {
     res.status(500).send({ msg: error });
   }
+
+  }
+
+
+  module.exports.getTask = async (req, res) =>{
+
+    let taskList = await this.taskSchema.aggregate([
+      {$match: {userId: req.params.userId}}
+    ]);
+
+    res.status(200).send(taskList);
+
 
   }
