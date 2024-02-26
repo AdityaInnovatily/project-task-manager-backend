@@ -8,22 +8,25 @@ let TaskSchema = new Schema(
     },
     priority: {
       type: String,
-      required: true
+      required: true,
+      description: ["highPriority", "moderatePriority", "lowPriority"]
     },
     dueDate: {
       type: String,
-      required:true
+      // required:true
     },
     status:{
       type: String,
       required:true,
-      default: "ToDo"
+      default: "todo",
+      description:["backlog","todo", "inProgress", "done"]
     },
     checklist:{
         type: [{
             task:{type:String},
             isChecked: {type:Boolean, default: false},
-        }]
+        }],
+        required:true
     },
     userId:{
       type:String,

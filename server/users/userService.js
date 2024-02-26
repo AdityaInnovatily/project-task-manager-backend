@@ -82,22 +82,32 @@ console.log(req.body, userId);
   
   let userDetails = await userSchema.findOne({_id:userId});
 
+  if(oldPassword && newPassword){
+
   let isPaswordMatched =  await bcrypt.compare(oldPassword, userDetails.password);
 
-  
   if(!isPaswordMatched){
-   return res.send({msg:`${oldPassword} this is wrong password.`});
+   return res.send({msg: "wrong password"});
   }
-  
-  const hashedNewPassword = await bcrypt.hash(newPassword, 10);
 
+  const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+  
  let userResponse = await userSchema.updateOne({_id:userId},{
     name: name,
     password:hashedNewPassword
   });
 
+}
 
-  let updatedUser = await userSchema.findOne({_id: userId})
+else{
+
+  let userResponse = await userSchema.updateOne({_id:userId},{
+    name: name
+  });
+
+}
+
+let updatedUser = await userSchema.findOne({_id: userId});
   res.status(201).send(updatedUser);
 
 }

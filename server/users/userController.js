@@ -1,11 +1,11 @@
-const { registerUser, login, updateUser } = require("./userService");
+const { registerUser, login, updateUser, analytics } = require("./userService");
 const jwt = require('jsonwebtoken');
 const bcrypt = require("bcrypt");
 const router = require("express").Router();
 
 
 router.post('/register', registerUser);
-router.get('/login',login);
+router.post('/login',login);
 router.post('/updateUser',updateUser);
 
 
