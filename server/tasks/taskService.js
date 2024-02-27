@@ -94,13 +94,39 @@ module.exports.createTask = async (req, res) => {
 
   module.exports.getTask = async (req, res) =>{
     console.log("req.params", req.params);
+   
+      let sortByDate;
 
-    let taskList = await taskSchema.aggregate([
-      {$match: {userId: req.params.userId}}
+      if(req?.params?.sortBy == "thisDay"){
+        let dt = new Date();
+      let dateString = dt.toISOString();
+
+       let datePart = dateString.slice(0,10);
+      sortByDate = datePart +"T00:00:00.000+00:00";
+      
+    }
+    else if(req?.params?.sortBy == "thisMonth"){
+    sortByDate = Date.now() - 30 * 24 * 60 * 60 * 1000;
+  
+  }
+  else if(req?.params?.sortBy == "thisWeek"){
+   
+  sortByDate = Date.now() - 7 * 24 * 60 * 60 * 1000;
+
+}
+
+   let taskList = await taskSchema.aggregate([
+      {$match: 
+        {
+        userId: req.params.userId,
+        // createdAt: { $gte: new Date(sortByDate)}
+        createdAt: { $gte: new Date(sortByDate)}
+        }
+    },  
+      {$sort: {updatedAt: 1 }}
     ]);
 
     res.status(200).send(taskList);
-
 
   }
 
@@ -118,7 +144,6 @@ module.exports.createTask = async (req, res) => {
       },
     );
 
-    // console.log("udpad", taskSubmit);
 
     if(!taskSubmit?.modifiedCount){
       // res.status(200).send({msg:"Task updated"});
@@ -149,11 +174,95 @@ module.exports.createTask = async (req, res) => {
 
   module.exports.analytics  = ( async (req, res)=>{
 
+    let response = {
+      backlog :0,
+      todo:0,
+      inProgress:0,
+      done:0,
+      lowPriority:0,
+      moderatePriority:0,
+      highPriority:0,
+      dueDateTasks:0
+    };
+
     let taskList = await taskSchema.aggregate([
       {$match: {userId: req.params.userId}}
     ]);
 
-    res.status(200).send(taskList);
+
+    for(let data of taskList){
+
+      if(data.status == "backlog"){
+        response.backlog++;
+      }
+      else if(data.status == "todo"){
+        response.todo++;
+      }
+      else if(data.status == "inProgress"){
+        response.inProgress++;
+      }
+      else if(data.status == "done"){
+        response.done++;
+      }
+
+
+      if(data.priority == "lowPriority"){
+
+        response.lowPriority++;
+      }
+      else if(data.priority == "moderatePriority"){
+
+        response.moderatePriority++;
+      }
+      else if(data.priority == "highPriority"){
+
+        response.highPriority++;
+      }
+
+
+      if(data.dueDate){
+        response.dueDateTasks++;
+      }
+
+    }
+
+
+    res.status(200).send(response);
 
   })
+
+
+  module.exports.updateChecklist = (async (req, res)=>{
+
+    const {taskId, checklistItemId, text, isChecked} = req.body;
+
+    // let updatedTaskChecklist = await taskSchema.updateOne(
+    //   {
+    //   _id: taskId,
+    //   "checklist._id": checklistItemId
+    // },{
+    //   $set: {
+    //     text: text,
+    //     isChecked: isChecked
+    //   }
+    // }
+    // );
+
+    // if(!updatedTaskChecklist?.modifiedCount){
+    //   // res.status(200).send({msg:"Task updated"});
+    //   res.status(500).send({msg:"Please, try again"});
+    // }else{
+    //   res.status(200).send("Checklist Updated");
+    // }
+
+
+    let check = await taskSchema.findOne({
+      // _id: taskId,
+      "checklist._id": checklistItemId
+    });
+
+    res.send(check);
+  })
+
+
   
