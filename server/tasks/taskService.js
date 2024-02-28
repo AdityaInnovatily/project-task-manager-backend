@@ -234,34 +234,23 @@ module.exports.createTask = async (req, res) => {
 
   module.exports.updateChecklist = (async (req, res)=>{
 
-    const {taskId, checklistItemId, text, isChecked} = req.body;
+    const {taskId, checklistItemId, task, isChecked} = req.body;
 
-    // let updatedTaskChecklist = await taskSchema.updateOne(
-    //   {
-    //   _id: taskId,
-    //   "checklist._id": checklistItemId
-    // },{
-    //   $set: {
-    //     text: text,
-    //     isChecked: isChecked
-    //   }
-    // }
-    // );
-
-    // if(!updatedTaskChecklist?.modifiedCount){
-    //   // res.status(200).send({msg:"Task updated"});
-    //   res.status(500).send({msg:"Please, try again"});
-    // }else{
-    //   res.status(200).send("Checklist Updated");
-    // }
-
-
-    let check = await taskSchema.findOne({
-      // _id: taskId,
+    let updatedTaskChecklist = await taskSchema.updateOne(
+      {
+      _id: taskId,
       "checklist._id": checklistItemId
-    });
+    },{
+       "$set": { "checklist.$.task": task, "checklist.$.isChecked": isChecked } 
+    }
+    );
 
-    res.send(check);
+    if(!updatedTaskChecklist?.modifiedCount){
+      res.status(500).send({msg:"Please, try again"});
+    }else{
+      res.status(200).send("Checklist Updated");
+    }
+
   })
 
 
