@@ -65,7 +65,9 @@ module.exports.login = async (req, res) => {
       return res.send({ msg: "Incorrect Password"});
     }
 
-    const token = jwt.sign({email}, process.env.SECRET_KEY, {expiresIn: '1d'});
+    const token = jwt.sign({email}, process.env.SECRET_KEY, 
+      // {expiresIn: '1d'}
+      );
 
     return res.send({token: token, userDetails: user});
 
